@@ -1,0 +1,112 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fortnite Chest Tracker</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  margin: 0; padding: 25px 18px;
+  background: #101522; color: white;
+  font-family: Arial, sans-serif;
+}
+.container { max-width: 500px; margin: auto; }
+h1 { text-align: center; color: #a98bff; }
+.card {
+  background: #202a3d; padding: 20px;
+  border-radius: 16px; margin: 16px 0;
+  text-align: center;
+}
+.number { font-size: 55px; font-weight: bold; }
+button {
+  border: 0; border-radius: 12px;
+  padding: 16px; font-size: 17px;
+  font-weight: bold; width: 100%;
+  margin: 6px 0; cursor: pointer;
+}
+.add { background: #8061ed; color: white; }
+.reset { background: #d94d59; color: white; }
+.secondary { background: #34435e; color: white; }
+.session {
+  background: #202a3d; padding: 14px;
+  border-radius: 10px; margin: 9px 0;
+  display: flex; justify-content: space-between;
+}
+.small { color: #b7c1d3; }
+</style>
+</head>
+<body>
+<div class="container">
+<h1>🏴‍☠️ Chest Tracker</h1>
+<p class="small" style="text-align:center">Fortnite Chest Counter</p>
+
+<div class="card">
+  <div class="small">CURRENT SESSION</div>
+  <div class="number" id="current">0</div>
+  <button class="add" onclick="addChest()">+ ADD CHEST</button>
+  <button class="reset" onclick="resetSession()">RESET SESSION</button>
+</div>
+
+<div class="card">
+  <div class="small">SESSIONS COMPLETED</div>
+  <div class="number" id="sessions">0</div>
+</div>
+
+<div class="card">
+  <div class="small">TOTAL CHESTS</div>
+  <div class="number" id="total">0</div>
+</div>
+
+<h2>📊 Session History</h2>
+<div id="history"></div>
+<button class="secondary" onclick="undoChest()">UNDO LAST CHEST</button>
+</div>
+
+<script>
+let data = JSON.parse(localStorage.getItem("chestTracker")) || {
+  current: 0, sessions: []
+};
+
+function save() {
+  localStorage.setItem("chestTracker", JSON.stringify(data));
+  render();
+}
+
+function addChest() {
+  data.current++;
+  save();
+}
+
+function undoChest() {
+  if (data.current > 0) {
+    data.current--;
+    save();
+  }
+}
+
+function resetSession() {
+  if (data.current === 0) return;
+  data.sessions.push(data.current);
+  data.current = 0;
+  save();
+}
+
+function render() {
+  document.getElementById("current").textContent = data.current;
+  document.getElementById("sessions").textContent = data.sessions.length;
+  document.getElementById("total").textContent =
+    data.sessions.reduce((a,b) => a+b, 0) + data.current;
+
+  document.getElementById("history").innerHTML =
+    data.sessions.length
+    ? [...data.sessions].reverse().map((n,i) =>
+      `<div class="session"><span>Session ${data.sessions.length-i}</span><b>${n} chests</b></div>`
+      ).join("")
+    : '<p class="small">No completed sessions yet.</p>';
+}
+render();
+</script>
+</body>
+</html>
